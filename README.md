@@ -15,4 +15,5 @@ Libraries that are available from Box2DWeb:
     Box2D.Collision.Shapes.b2CircleShape;
     Box2D.Dynamics.b2DebugDraw;
     Box2D.Dynamics.Joints.b2MouseJointDef;
+    Box2D.Dynamics.Joints.b2LineJointDef;
 
