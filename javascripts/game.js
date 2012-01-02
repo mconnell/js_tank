@@ -13,24 +13,26 @@ Game.initialise = function(){
 };
 
 Game.createTank = function(){
+  var base_height = 142.0;
+
   var ptm_ratio = 10;
 
   var b2Vec2 = Box2D.Common.Math.b2Vec2;
 
   var vertexes = [
     [
-      new b2Vec2(75.0/ptm_ratio, 65.0/ptm_ratio),
-      new b2Vec2(80.0/ptm_ratio, 72.0/ptm_ratio),
-      new b2Vec2(50.0/ptm_ratio, 72.0/ptm_ratio),
-      new b2Vec2(55.0/ptm_ratio, 65.0/ptm_ratio)
+      new b2Vec2(75.0/ptm_ratio, (base_height+5.0)/ptm_ratio),
+      new b2Vec2(80.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
+      new b2Vec2(50.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
+      new b2Vec2(55.0/ptm_ratio, (base_height+5.0)/ptm_ratio)
     ],
     [
-      new b2Vec2(85.0/ptm_ratio, 78.0/ptm_ratio),
-      new b2Vec2(45.0/ptm_ratio, 78.0/ptm_ratio),
-      new b2Vec2(40.0/ptm_ratio, 74.0/ptm_ratio),
-      new b2Vec2(40.0/ptm_ratio, 72.0/ptm_ratio),
-      new b2Vec2(90.0/ptm_ratio, 72.0/ptm_ratio),
-      new b2Vec2(90.0/ptm_ratio, 74.0/ptm_ratio)
+      new b2Vec2(83.0/ptm_ratio, (base_height+18.0)/ptm_ratio),
+      new b2Vec2(47.0/ptm_ratio, (base_height+18.0)/ptm_ratio),
+      new b2Vec2(42.0/ptm_ratio, (base_height+14.0)/ptm_ratio),
+      new b2Vec2(43.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
+      new b2Vec2(87.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
+      new b2Vec2(88.0/ptm_ratio, (base_height+14.0)/ptm_ratio)
     ]
   ];
 
@@ -38,6 +40,7 @@ Game.createTank = function(){
   fixDef.density = 1.0;
   fixDef.friction = 0.5;
   fixDef.restitution = 0.2;
+  fixDef.filter.groupIndex = -1;
   fixDef.shape = new Box2D.Collision.Shapes.b2PolygonShape;
 
   var bodyDef = new Box2D.Dynamics.b2BodyDef;
@@ -45,18 +48,18 @@ Game.createTank = function(){
   var body = Game.world.CreateBody(bodyDef)
 
   createShape(body, fixDef, vertexes);
-  // createTankWheel(body, 45.0/ptm_ratio, 75.0/ptm_ratio, 0.25, 5.5);
 
   Tank.wheels = [
-    createTankWheel(body, 50.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 55.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 60.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 65.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 70.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 75.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 80.0/ptm_ratio, 77.0/ptm_ratio, 0.2, 5.5)
+    createTankWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 50.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 55.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 60.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 65.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 70.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 75.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 80.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createTankWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2, 5.5)
   ]
-  // createTankWheel(body, 85.0/ptm_ratio, 75.0/ptm_ratio, 0.25, 5.5);
 
   createTankChain();
 };
@@ -83,11 +86,11 @@ Game.createBoundaryWalls = function(){
   fixDef.shape.SetAsBox(20, 2);
 
   // ground
-  bodyDef.position.Set(10, 400 / 30 + 1.8);
+  bodyDef.position.Set(14.5, 500 / 30 + 1.8);
   Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
 
   // roof
-  bodyDef.position.Set(10, -1.8);
+  bodyDef.position.Set(14.5, -1.8);
   Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
 
   // wall width
@@ -97,7 +100,7 @@ Game.createBoundaryWalls = function(){
   bodyDef.position.Set(-1.8, 13);
   Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
   // right wall
-  bodyDef.position.Set(21.8, 13);
+  bodyDef.position.Set(36, 13);
   Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
 };
 
@@ -228,7 +231,7 @@ function createShape(body, fixtureDefinition, vertexes){
 function createCircleBody(radius, xPosition, yPosition){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
-  fixDef.friction = 0.5;
+  fixDef.friction = 1;
   fixDef.restitution = 0.2;
   fixDef.shape = new Box2D.Collision.Shapes.b2CircleShape(radius);
 
@@ -246,8 +249,9 @@ function createCircleBody(radius, xPosition, yPosition){
 function createRectangle(width, height, xPosition, yPosition){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
-  fixDef.friction = 0.5;
+  fixDef.friction = 1;
   fixDef.restitution = 0.2;
+  fixDef.filter.groupIndex = -1;
   fixDef.shape = new Box2D.Collision.Shapes.b2PolygonShape;
   fixDef.shape.SetAsBox(width, height);
 
@@ -288,6 +292,7 @@ function createTankChain(){
 
   function createChainLength(x, y, count){
     var previous_track_piece;
+    var first_track_piece;
     for(var track = 0; track < count; track++){
       track_piece = createRectangle(track_width, track_height, x, y);
       x += offset;
@@ -296,13 +301,19 @@ function createTankChain(){
         distanceJointDef.Initialize(previous_track_piece, track_piece, new b2Vec2(x - track_width*3.5, y), new b2Vec2(x - track_width*3, y));
         distanceJointDef.collideConnected = true;
         Game.world.CreateJoint(distanceJointDef);
+      }else{
+        first_track_piece = track_piece;
       }
       previous_track_piece = track_piece;
     };
+
+    return [first_track_piece, track_piece];
   };
 
-  createChainLength(4.8, 12, 17);
-  createChainLength(10.8, 2.5, 17);
+  chain1 = createChainLength(4.85, 13, 16);
+  chain2 = createChainLength(4.85, 12.5, 16);
+
+
 }
 
 Tank = {
@@ -311,12 +322,14 @@ Tank = {
 
 Tank.moveLeft = function(){
   for(var i = 0; i < Tank.wheels.length; i++){
+    Tank.wheels[i].SetAwake(true);
     Tank.wheels[i].m_angularVelocity = -Tank.velocity;
   };
 };
 
 Tank.moveRight = function(){
   for(var i = 0; i < Tank.wheels.length; i++){
+    Tank.wheels[i].SetAwake(true);
     Tank.wheels[i].m_angularVelocity = Tank.velocity;
   };
 };
