@@ -57,20 +57,21 @@ Game.createTank = function(){
   createShape(body, fixDef, vertexes);
 
 
-  createSupportWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
+
   createSupportWheel(body, 55.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
   createSupportWheel(body, 65.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
   createSupportWheel(body, 75.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
-  createSupportWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
 
   Tank.wheels = [
+    createSupportWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2),
     createTankWheel(body, 50.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 55.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 60.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 65.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 70.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 75.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 80.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5)
+    createTankWheel(body, 80.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
+    createSupportWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2)
   ]
 
   createTankChain();
@@ -291,7 +292,7 @@ function createCircleBody(radius, xPosition, yPosition, friction){
 function createRectangle(width, height, xPosition, yPosition, rotation){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
-  fixDef.friction = 2.3;
+  fixDef.friction = 3;
   fixDef.restitution = 0.2;
   fixDef.filter.groupIndex = -1;
   fixDef.shape = new Box2D.Collision.Shapes.b2PolygonShape;
@@ -310,15 +311,16 @@ function createRectangle(width, height, xPosition, yPosition, rotation){
 }
 
 function createSupportWheel(body, x, y, radius){
-  wheel = createCircleBody(radius, x, y, 0);
+  var wheel = createCircleBody(radius, x, y, 0);
   jointDef = new Box2D.Dynamics.Joints.b2RevoluteJointDef();
   jointDef.Initialize(body, wheel, new Box2D.Common.Math.b2Vec2(x,y));
   Game.world.CreateJoint(jointDef);
+  return wheel;
 }
 
 
 function createTankWheel(body, x, y, radius, force){
-  wheel = createCircleBody(radius, x, y);
+  var wheel = createCircleBody(radius, x, y);
 
   lineJointDef = new Box2D.Dynamics.Joints.b2LineJointDef();
   lineJointDef.Initialize(body, wheel, wheel.GetWorldCenter(), new Box2D.Common.Math.b2Vec2(0, 1));
