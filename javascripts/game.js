@@ -13,7 +13,7 @@ Game.initialise = function(){
 };
 
 Game.createTank = function(){
-  var base_height = 142.0;
+  var base_height = 140.0;
 
   var ptm_ratio = 10;
 
@@ -33,6 +33,12 @@ Game.createTank = function(){
       new b2Vec2(43.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
       new b2Vec2(87.0/ptm_ratio, (base_height+10.0)/ptm_ratio),
       new b2Vec2(88.0/ptm_ratio, (base_height+14.0)/ptm_ratio)
+    ],
+    [
+      new b2Vec2(95.0/ptm_ratio, (base_height+7.0)/ptm_ratio),
+      new b2Vec2(95.0/ptm_ratio, (base_height+8.0)/ptm_ratio),
+      new b2Vec2(65.0/ptm_ratio, (base_height+8.0)/ptm_ratio),
+      new b2Vec2(65.0/ptm_ratio, (base_height+7.0)/ptm_ratio)
     ]
   ];
 
@@ -49,16 +55,21 @@ Game.createTank = function(){
 
   createShape(body, fixDef, vertexes);
 
+
+  createSupportWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
+  createSupportWheel(body, 55.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
+  createSupportWheel(body, 65.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
+  createSupportWheel(body, 75.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
+  createSupportWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
+
   Tank.wheels = [
-    createTankWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 50.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 55.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 60.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 65.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 70.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
     createTankWheel(body, 75.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 80.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5),
-    createTankWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2, 5.5)
+    createTankWheel(body, 80.0/ptm_ratio, (base_height+17.0)/ptm_ratio, 0.2, 5.5)
   ]
 
   createTankChain();
@@ -228,10 +239,10 @@ function createShape(body, fixtureDefinition, vertexes){
   }
 }
 
-function createCircleBody(radius, xPosition, yPosition){
+function createCircleBody(radius, xPosition, yPosition, friction){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
-  fixDef.friction = 1;
+  fixDef.friction = friction || 1;
   fixDef.restitution = 0.2;
   fixDef.shape = new Box2D.Collision.Shapes.b2CircleShape(radius);
 
@@ -246,7 +257,7 @@ function createCircleBody(radius, xPosition, yPosition){
   return body;
 }
 
-function createRectangle(width, height, xPosition, yPosition){
+function createRectangle(width, height, xPosition, yPosition, rotation){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
   fixDef.friction = 1;
@@ -259,10 +270,19 @@ function createRectangle(width, height, xPosition, yPosition){
   bodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
   bodyDef.position.x = xPosition;
   bodyDef.position.y = yPosition;
+  if(rotation){ bodyDef.angle = rotation; }
 
   var body = Game.world.CreateBody(bodyDef)
   body.CreateFixture(fixDef);
+
   return body;
+}
+
+function createSupportWheel(body, x, y, radius){
+  wheel = createCircleBody(radius, x, y, 0);
+  jointDef = new Box2D.Dynamics.Joints.b2RevoluteJointDef();
+  jointDef.Initialize(body, wheel, new Box2D.Common.Math.b2Vec2(x,y));
+  Game.world.CreateJoint(jointDef);
 }
 
 
@@ -290,6 +310,13 @@ function createTankChain(){
   var track_height = 0.05;
   var offset = track_width * 2.2;
 
+  function createJoint(body_a, body_b, pos_a, pos_b){
+    distanceJointDef = new Box2D.Dynamics.Joints.b2DistanceJointDef();
+    distanceJointDef.Initialize(body_a, body_b, pos_a, pos_b);
+    distanceJointDef.collideConnected = true;
+    Game.world.CreateJoint(distanceJointDef);
+  }
+
   function createChainLength(x, y, count){
     var previous_track_piece;
     var first_track_piece;
@@ -297,10 +324,7 @@ function createTankChain(){
       track_piece = createRectangle(track_width, track_height, x, y);
       x += offset;
       if(previous_track_piece){
-        distanceJointDef = new Box2D.Dynamics.Joints.b2DistanceJointDef();
-        distanceJointDef.Initialize(previous_track_piece, track_piece, new b2Vec2(x - track_width*3.5, y), new b2Vec2(x - track_width*3, y));
-        distanceJointDef.collideConnected = true;
-        Game.world.CreateJoint(distanceJointDef);
+        createJoint(previous_track_piece, track_piece, new b2Vec2(x - track_width*3.5, y), new b2Vec2(x - track_width*3, y));
       }else{
         first_track_piece = track_piece;
       }
@@ -310,10 +334,33 @@ function createTankChain(){
     return [first_track_piece, track_piece];
   };
 
-  chain1 = createChainLength(4.85, 13, 16);
-  chain2 = createChainLength(4.85, 12.5, 16);
+  chain1 = createChainLength(4.5, 15.25, 19);
+  chain2 = createChainLength(4.9, 16.05, 15);
+
+  var a = createRectangle(track_width, track_height, 8.18, 16, -0.65);
+  createJoint(chain2[1], a, new b2Vec2(8.05, 16.05), new b2Vec2(8.08, 16.05));
+  var b = createRectangle(track_width, track_height, 8.37, 15.84, -0.65);
+  createJoint(a,b, new b2Vec2(8.25, 15.95), new b2Vec2(8.28, 15.9));
+  var c = createRectangle(track_width, track_height, 8.56, 15.68, -0.65);
+  createJoint(b,c, new b2Vec2(8.4, 15.8), new b2Vec2(8.5, 15.7));
+  var d = createRectangle(track_width, track_height, 8.65, 15.50, 1.6);
+  createJoint(c, d, new b2Vec2(8.6, 15.68), new b2Vec2(8.65, 15.6));
+  var e = createRectangle(track_width, track_height, 8.60, 15.32, 0.65);
+  createJoint(d, e, new b2Vec2(8.65, 15.45), new b2Vec2(8.65, 15.43))
+  createJoint(e, chain1[1], new b2Vec2(8.6, 15.28), new b2Vec2(8.45, 15.25));
 
 
+  var f = createRectangle(track_width, track_height, 4.32, 15.32, -0.65);
+  createJoint(chain1[0], f, new b2Vec2(4.38, 15.25), new b2Vec2(4.42, 15.24))
+  var g = createRectangle(track_width, track_height, 4.25, 15.50, 1.6);
+  createJoint(f, g, new b2Vec2(4.26, 15.38), new b2Vec2(4.25, 15.42));
+  var h = createRectangle(track_width, track_height, 4.32, 15.68, 0.65);
+  createJoint(g, h, new b2Vec2(4.25, 15.60), new b2Vec2(4.28, 15.65));
+  var i = createRectangle(track_width, track_height, 4.51, 15.84, 0.65);
+  createJoint(h, i, new b2Vec2(4.38, 15.75), new b2Vec2(4.45, 15.8));
+  var j = createRectangle(track_width, track_height, 4.7, 16, 0.65);
+  createJoint(i, j, new b2Vec2(4.55, 15.9), new b2Vec2(4.65, 15.95));
+  createJoint(j, chain2[0], new b2Vec2(4.75, 16.05), new b2Vec2(4.85, 16.05));
 }
 
 Tank = {
