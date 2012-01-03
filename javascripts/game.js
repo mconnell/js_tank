@@ -6,6 +6,7 @@ Game.initialise = function(){
   Input.initialise();
   Game.createBoundaryWalls();
   // Game.createRandomObjects();
+  Game.createTerrain();
   Game.createTank();
   Game.setupDebugDraw();
   Mouse.addEventListeners();
@@ -57,9 +58,9 @@ Game.createTank = function(){
 
 
   createSupportWheel(body, 46.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
-  createSupportWheel(body, 55.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
-  createSupportWheel(body, 65.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
-  createSupportWheel(body, 75.0/ptm_ratio, (base_height+13.5)/ptm_ratio, 0.1);
+  createSupportWheel(body, 55.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
+  createSupportWheel(body, 65.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
+  createSupportWheel(body, 75.0/ptm_ratio, (base_height+12.8)/ptm_ratio, 0.1);
   createSupportWheel(body, 84.0/ptm_ratio, (base_height+14.0)/ptm_ratio, 0.2);
 
   Tank.wheels = [
@@ -115,9 +116,39 @@ Game.createBoundaryWalls = function(){
   Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
 };
 
+Game.createTerrain = function(){
+  var fixDef = new Box2D.Dynamics.b2FixtureDef;
+  fixDef.density = 1.0;
+  fixDef.friction = 0.5;
+  fixDef.restitution = 0.2;
+
+  var bodyDef = new Box2D.Dynamics.b2BodyDef;
+
+  bodyDef.type = Box2D.Dynamics.b2Body.b2_staticBody;
+  fixDef.shape = new Box2D.Collision.Shapes.b2PolygonShape;
+  bodyDef.position.Set(12, 15);
+  var hill = [
+      new Box2D.Common.Math.b2Vec2(3, 2),
+      new Box2D.Common.Math.b2Vec2(-3, 2),
+      new Box2D.Common.Math.b2Vec2(0, 0),
+      new Box2D.Common.Math.b2Vec2(3, 0)
+  ]
+  fixDef.shape.SetAsArray(hill)
+  Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
+  bodyDef.position.Set(19, 12);
+  var hill = [
+      new Box2D.Common.Math.b2Vec2(7, 4.5),
+      new Box2D.Common.Math.b2Vec2(-4, 3),
+      new Box2D.Common.Math.b2Vec2(1.5, 0),
+      new Box2D.Common.Math.b2Vec2(2, 0)
+  ]
+  fixDef.shape.SetAsArray(hill)
+  Game.world.CreateBody(bodyDef).CreateFixture(fixDef);
+}
+
 Game.createRandomObjects = function(){
-  for(var i = 0; i < 100; ++i) {
-    createCircleBody(0.1, 10, 10);
+  for(var i = 0; i < 50; ++i) {
+    createCircleBody(0.15, 20, i/2);
   }
 };
 
@@ -260,7 +291,7 @@ function createCircleBody(radius, xPosition, yPosition, friction){
 function createRectangle(width, height, xPosition, yPosition, rotation){
   var fixDef = new Box2D.Dynamics.b2FixtureDef;
   fixDef.density = 1.0;
-  fixDef.friction = 1;
+  fixDef.friction = 2.3;
   fixDef.restitution = 0.2;
   fixDef.filter.groupIndex = -1;
   fixDef.shape = new Box2D.Collision.Shapes.b2PolygonShape;
@@ -364,13 +395,15 @@ function createTankChain(){
 }
 
 Tank = {
-  velocity: 25
+  velocity: 7,
+  torque: 2.3
 };
 
 Tank.moveLeft = function(){
   for(var i = 0; i < Tank.wheels.length; i++){
     Tank.wheels[i].SetAwake(true);
     Tank.wheels[i].m_angularVelocity = -Tank.velocity;
+    Tank.wheels[i].m_torque = -Tank.torque;
   };
 };
 
@@ -378,6 +411,7 @@ Tank.moveRight = function(){
   for(var i = 0; i < Tank.wheels.length; i++){
     Tank.wheels[i].SetAwake(true);
     Tank.wheels[i].m_angularVelocity = Tank.velocity;
+    Tank.wheels[i].m_torque = Tank.torque;
   };
 };
 
